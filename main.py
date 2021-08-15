@@ -22,7 +22,7 @@ def inicio():
   return "Hola mundo 2"
 
 
-@app.route('/getPadreFamilia', methods=["GET"])
+@app.route('/verPadresFamilias', methods=["GET"])
 def prueba():
   conn = Conexion()
   cursor1=conn.cursor(cursor_factory=RealDictCursor)
