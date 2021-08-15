@@ -15,15 +15,43 @@ CORS(app)
 def Conexion():
   return psycopg2.connect(host="ec2-23-21-4-7.compute-1.amazonaws.com",database="d788louhdpbuak", user="sbnbneejrneocn", password="01d52cb0709999b659de360be58f509abbb4539b0270ad612af8af6af0116c42")
 
-
+## Conectividad a la base de datos local, para pruebas
+##  return psycopg2.connect(host="",database="", user="", password="")
 
 @app.route('/')
 def inicio():
   return "Hola mundo 2"
 
 
+##Login
+
+
+
+##Fin login
+
+
+##Inicio CU2: Materias
+
+@app.route('/getListaMaterias', methods=["POST"])
+def getListaMaterias():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from materia where idprofesor=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+##Fin CU2: Materias
+
+
 @app.route('/getPadreFamilia', methods=["GET"])
-def prueba():
+def getPadreFamilia():
   conn = Conexion()
   cursor1=conn.cursor(cursor_factory=RealDictCursor)
   cursor1.execute("select *from padrefamilia")
@@ -32,7 +60,7 @@ def prueba():
   cursor1.close()
   return json.dumps(resultado)
 
-
+##Inicio CU7: Vincular cuenta
 @app.route('/setDatosEstudiante', methods=["POST"])
 def setDatosEstudiante():
   conn = Conexion()
@@ -63,6 +91,7 @@ def setDatosProfesor():
   except Exception as err:
     return "0"
 
+##Fin CU7: Vincular cuenta
 
 
 ## Aplicacion del PNL
