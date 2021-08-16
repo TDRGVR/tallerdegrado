@@ -25,6 +25,20 @@ def inicio():
 
 ##Login
 
+@app.route('/getTipoCuenta', methods=["POST"])
+def getTipoCuenta():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from cuenta where id=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
 
 
 ##Fin login
@@ -46,6 +60,53 @@ def getListaMaterias():
   conn.close()
   cursor1.close()
   return json.dumps(resultado)
+
+@app.route('/getDatosMateria', methods=["POST"])
+def getDatosMateria():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from materia where id=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+@app.route('/getLisTemas', methods=["POST"])
+def getListTemas():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from tema where idmateria=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+
+@app.route('/getListaMateriasAlumno', methods=["POST"])
+def getListaMateriasAlumno():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select c.nombrecurso, m.id, m.nombre, m.descripcion, m.objetivo, m.nivel from curso as c inner join cursomateria as cm on c.id=cm.idcurso inner join materia as m on cm.idmateria=m.id inner join cursoalumno as ca on ca.idcurso=c.id	where ca.idalumno=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
 
 ##Fin CU2: Materias
 
