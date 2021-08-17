@@ -108,7 +108,85 @@ def getListaMateriasAlumno():
   return json.dumps(resultado)
 
 
+@app.route('/getListaTareas', methods=["POST"])
+def getListaTareas():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from tarea where idTema=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+
 ##Fin CU2: Materias
+
+@app.route('/getDatosTarea', methods=["POST"])
+def getDatosTarea():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from tarea where id=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+
+
+
+##Inicio CU4: Envio tarea
+
+@app.route('/setTareaAlumno', methods=["POST"])
+def getTareaAlumno():
+  conn = Conexion()
+  cursor1=conn.cursor()
+  sql="insert into entregatareaestudiante (comentarioalumno,linktrabajo,califiaccion,obervacionporfesor,idalumno,idtarea) values (%s,%s,null,null,%s,%s);"
+  datos=(request.form['comentario'], request.form['link'],request.form['idAlumno'],request.form['idTarea'])
+  try:
+    cursor1.execute(sql, datos)
+    conn.commit()
+    conn.close()
+    cursor1.close()
+    return "1"
+  except Exception as err:
+    return "0"
+
+##Fin Cu4: Envio tarea
+
+##Inicio CU3: Calificar tarea
+
+
+
+
+@app.route('/getListaTareasEnviadas', methods=["POST"])
+def getListaTareasEnviadas():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select entregat.id,entregat.linktrabajo, cuenta.nombre, cuenta.apellido,entregat.califiaccion, entregat.comentarioalumno from tarea inner join entregatareaestudiante as entregat on tarea.id=entregat.idtarea inner join alumno on alumno.id=entregat.idalumno inner join cuenta on alumno.id=cuenta.id where tarea.id=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+
+
+##Fin CU3: Calificar tarrea
+
 
 
 @app.route('/getPadreFamilia', methods=["GET"])
