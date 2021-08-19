@@ -124,6 +124,38 @@ def getListaTareas():
   return json.dumps(resultado)
 
 
+@app.route('/setNuevaTarea', methods=["POST"])
+def setNuevaTarea():
+  conn = Conexion()
+  cursor1=conn.cursor()
+  sql="insert into tarea(descripcion, linksauxiliar, idtema) values (%s, %s,%s);"
+  datos=(request.form['descripcion'], request.form['link'],request.form['id'])
+  try:
+    cursor1.execute(sql, datos)
+    conn.commit()
+    conn.close()
+    cursor1.close()
+    return "1"
+  except Exception as err:
+    return "0"
+
+@app.route('/setNuevoTema', methods=["POST"])
+def setNuevoTema():
+  conn = Conexion()
+  cursor1=conn.cursor()
+  sql="insert into tema(titulo,contenido,descripcion,idmateria) values(%s, %s,%s,%s);"
+  datos=(request.form['titulo'], request.form['link'],request.form['descripcion'],request.form['id'])
+  try:
+    cursor1.execute(sql, datos)
+    conn.commit()
+    conn.close()
+    cursor1.close()
+    return "1"
+  except Exception as err:
+    return "0"
+
+
+
 ##Fin CU2: Materias
 
 @app.route('/getDatosTarea', methods=["POST"])
@@ -184,8 +216,80 @@ def getListaTareasEnviadas():
   return json.dumps(resultado)
 
 
+@app.route('/getDatosTareaDelEstudiante', methods=["POST"])
+def getDatosTareaDelEstudiante():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select *from entregatareaestudiante where id=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+
 
 ##Fin CU3: Calificar tarrea
+
+
+
+##Inicio Tendencia academica
+
+@app.route('/insertTendenciaTarea', methods=["POST"])
+def insertTendenciaTarea():
+  conn = Conexion()
+  cursor1=conn.cursor()
+  sql="insert into TendenciaTrabajo(neg,neu,pos,tendencia, idtareaestudiante) values (%s,%s,%s,%s,%s)"
+  datos=(request.form['neg'], request.form['neu'],request.form['pos'],request.form['tendencia'],request.form['id'])
+  try:
+    cursor1.execute(sql, datos)
+    conn.commit()
+    conn.close()
+    cursor1.close()
+    return "1"
+  except Exception as err:
+    return "0"
+
+
+##Fin tendencia academica
+
+##Seguimiento academico
+
+@app.route('/getListaHijos', methods=["POST"])
+def getListaHijos():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select cuenta.id, cuenta.nombre, cuenta.apellido from alumno inner join cuenta on cuenta.id=alumno.id where alumno.idpadre1=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+@app.route('/getHistorialHijo', methods=["POST"])
+def getHistorialHijo():
+  conn = Conexion()
+  cursor1=conn.cursor(cursor_factory=RealDictCursor)
+
+  sql="select  cuenta.id, cuenta.nombre, cuenta.apellido, et.califiaccion, et.id, tema.titulo, ten.tendencia::text from alumno inner join cuenta on cuenta.id=alumno.id inner join entregatareaestudiante as et on et.idalumno=alumno.id inner join tarea on tarea.id=et.idtarea inner join tema on tema.id=tarea.idtema inner join TendenciaTrabajo as ten on ten.IDTareaEstudiante=et.id where alumno.id=%s"
+  datos=(request.form['id'],)
+
+  cursor1.execute(sql,datos)
+  conn.commit()
+  resultado = cursor1.fetchall()
+  conn.close()
+  cursor1.close()
+  return json.dumps(resultado)
+
+##Fin seguimiento academico
 
 
 
@@ -204,8 +308,8 @@ def getPadreFamilia():
 def setDatosEstudiante():
   conn = Conexion()
   cursor1=conn.cursor()
-  sql="insert into alumno(id,nombre,apellido,direccion,idpadre1,idpadre2) values(%s,%s,%s,%s,%s,null)"
-  datos=(request.form['id'], request.form['nombre'],request.form['apellido'],request.form['dir'],request.form['idpadre1'])
+  sql="insert into cuenta(id,nombre,apellido, direccion, telefono, tipo) values (%s,%s,%s,%s,null,2); insert into alumno(id,sexo,idpadre1) values (%s,'M',%s);"
+  datos=(request.form['id'], request.form['nombre'],request.form['apellido'],request.form['dir'],request.form['id'],request.form['idpadre1'])
   try:
     cursor1.execute(sql, datos)
     conn.commit()
@@ -219,8 +323,8 @@ def setDatosEstudiante():
 def setDatosProfesor():
   conn = Conexion()
   cursor1=conn.cursor()
-  sql="insert into profesor(id,nombre,apellido,especialidad,telefono) values (%s,%s,%s,%s,%s)"
-  datos=(request.form['id'], request.form['nombre'],request.form['apellido'],request.form['especialidad'],request.form['telefono'])
+  sql="insert into cuenta(id,nombre,apellido, direccion, telefono, tipo) values (%s,%s,%s,'',%s,3); insert into profesor(id, especialidad) values (%s,%s);"
+  datos=(request.form['id'], request.form['nombre'],request.form['apellido'],request.form['telefono'],request.form['id'],request.form['especialidad'])
   try:
     cursor1.execute(sql, datos)
     conn.commit()
@@ -229,6 +333,23 @@ def setDatosProfesor():
     return "1"
   except Exception as err:
     return "0"
+
+
+@app.route('/CalificarUpdate', methods=["POST"])
+def CalificarUpdate():
+  conn = Conexion()
+  cursor1=conn.cursor()
+  sql="update entregatareaestudiante set califiaccion=%s, obervacionporfesor=%s where id=%s"
+  datos=(request.form['cali'], request.form['observacion'],request.form['id'])
+  try:
+    cursor1.execute(sql, datos)
+    conn.commit()
+    conn.close()
+    cursor1.close()
+    return "1"
+  except Exception as err:
+    return "0"
+
 
 ##Fin CU7: Vincular cuenta
 
